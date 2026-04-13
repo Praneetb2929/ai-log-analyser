@@ -1,29 +1,20 @@
-import ollama
+import google.generativeai as genai
+import os
 
-def analyze_errors(errors: list):
-    if not errors:
-        return "No critical errors found."
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
+def analyze_errors(errors):
     prompt = f"""
-You are a senior DevOps engineer.
+    Analyze the following system errors and provide:
+    - Root cause
+    - Impact
+    - Solution
 
-Analyze the following system errors and explain:
+    Errors:
+    {errors}
+    """
 
-1. What the error means
-2. Possible cause
-3. How to fix it (step-by-step)
+    model = genai.GenerativeModel("gemini-pro")
+    response = model.generate_content(prompt)
 
-Errors:
-{errors}
-
-Give clear and simple explanation.
-"""
-
-    response = ollama.chat(
-        model="qwen2.5:1.5b",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
-
-    return response["message"]["content"]
+    return response.text
